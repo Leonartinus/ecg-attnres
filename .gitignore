@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ipynb_checkpoints/
+
+# Data (lives in Drive, never in git)
+data/ptbxl/*
+!data/ptbxl/.gitkeep
+
+# Training artifacts
+checkpoints/*
+!checkpoints/.gitkeep
+logs/*
+!logs/.gitkeep
+outputs/*
+!outputs/.gitkeep
+figures/*
+!figures/.gitkeep
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editors
+.vscode/
+.idea/
+*.swp
+
+# Notebooks — keep structure but not outputs
+# Tip: run `jupyter nbconvert --clear-output --inplace notebooks/*.ipynb` before commit

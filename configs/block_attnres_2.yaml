@@ -1,0 +1,41 @@
+# Block AttnRes with N=2 blocks (6 layers / 3 per block): block-size ablation
+experiment_name: block_attnres_2
+
+model:
+  type: block_attnres
+  n_blocks: 2
+  d_model: 256
+  n_layers: 6
+  n_heads: 4
+  d_ff: 1024
+  dropout: 0.1
+
+tokenizer:
+  n_leads: 12
+  d_model: 256
+
+head:
+  n_classes: 5
+  dropout: 0.3
+  use_demographics: true
+
+training:
+  sampling_rate: 100
+  batch_size: 128
+  epochs: 50
+  optimizer: adamw
+  lr: 1.0e-3
+  weight_decay: 0.01
+  scheduler: cosine
+  min_lr: 1.0e-5
+  early_stop_patience: 10
+  augment: true
+
+data:
+  data_dir: data/ptbxl
+  task: superclass
+
+logging:
+  log_dir: logs
+  checkpoint_dir: checkpoints
+  output_dir: outputs
