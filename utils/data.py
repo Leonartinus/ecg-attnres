@@ -23,7 +23,7 @@ SUPERCLASSES = ["NORM", "MI", "STTC", "CD", "HYP"]
 def load_metadata(data_dir: Path) -> pd.DataFrame:
     """Load ptbxl_database.csv, parse scp_codes column, return DataFrame."""
     # TODO: read ptbxl_database.csv
-    df = pd.read_csv(data_dir / "ptbxl_database.csv", index_col="ecg_id")
+    df = pd.read_csv(data_dir / "ptbxl_database.csv")
     # TODO: parse scp_codes (stored as literal dict strings)
     df.scp_codes = df.scp_codes.apply(lambda x: ast.literal_eval(x))
     # TODO: merge with scp_statements.csv to get superclass mapping
@@ -55,9 +55,9 @@ def load_signals(df: pd.DataFrame, data_dir: Path, sampling_rate: int = 100) -> 
     # TODO: iterate over df.filename_lr (100Hz) or df.filename_hr (500Hz)
     # TODO: wfdb.rdsamp each file; stack
     if sampling_rate == 100:
-        data = [wfdb.rdsamp(data_dir+f) for f in df.filename_lr]
+        data = [wfdb.rdsamp(data_dir / f) for f in df.filename_lr]
     else:
-        data = [wfdb.rdsamp(data_dir+f) for f in df.filename_hr]
+        data = [wfdb.rdsamp(data_dir / f) for f in df.filename_hr]
     data = np.array([signal for signal, meta in data])
 
     return data
