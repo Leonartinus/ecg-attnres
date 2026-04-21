@@ -28,5 +28,13 @@ Thumbs.db
 .idea/
 *.swp
 
+# temp files
+*.tmp
+temp*
+*.temp
+temp/*
+*.bak
+*.log
+
 # Notebooks — keep structure but not outputs
 # Tip: run `jupyter nbconvert --clear-output --inplace notebooks/*.ipynb` before commit

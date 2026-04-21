@@ -50,7 +50,7 @@ class ECGTokenizer(nn.Module):
 
         lead_idx = torch.arange(n_leads, device=x.device)
         lead_emb = self.lead_embedding(lead_idx)  # (n_leads, d_model)
-        x = x + lead_emb.unsqueeze(2)  # (batch, n_leads, seq_len_per_lead, d_model)
+        x = x + lead_emb.unsqueeze(1)  # (batch, n_leads, seq_len_per_lead, d_model)
 
         x = x.reshape(batch_size, n_leads * seq_len, self.d_model) # (batch, seq_len_per_lead, d_model)
 
