@@ -51,7 +51,7 @@ class StandardTransformerEncoder(nn.Module):
         ])
 
         # TODO: optional final layer norm for prenorm variant
-        self.final_norm = nn.LayerNorm(d_model) if prenorm else None
+        self.final_norm = nn.LayerNorm(d_model) if prenorm else nn.Identity()
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         for layer in self.layers:
@@ -59,5 +59,5 @@ class StandardTransformerEncoder(nn.Module):
 
         if self.final_norm is not None:
             x = self.final_norm(x)
-            
+
         return x
