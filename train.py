@@ -141,8 +141,11 @@ def main():
     # Load data
     data_dir = Path(cfg['data']['data_dir'])
     df = load_metadata(data_dir)
+    print(f"Loaded metadata for {len(df)} samples.")
     X = load_signals(df, data_dir, sampling_rate=cfg['training']['sampling_rate'])
+    print(f"Loaded signals with shape {X.shape}.")
     splits = get_splits(df, X)
+    print(f"Train samples: {len(splits['X_train'])}, Val samples: {len(splits['X_val'])}, Test samples: {len(splits['X_test'])}")
 
     # For testing using a small subset
     # subset_size = 10
@@ -154,10 +157,12 @@ def main():
     # Create datasets
     train_dataset = PTBXLDataset(splits['X_train'], splits['y_train'], augment=cfg['training']['augment'])
     val_dataset = PTBXLDataset(splits['X_val'], splits['y_val'], augment=False)
+    print(f"Train dataset size: {len(train_dataset)}, Val dataset size: {len(val_dataset)}")
 
     # Seeded generator so shuffle order is reproducible across runs with the same --seed.
     g = torch.Generator()
     g.manual_seed(args.seed)
+    print(f"DataLoader generator seed: {args.seed}")
 
     def _worker_init(worker_id):
         seed = args.seed + worker_id
@@ -177,6 +182,7 @@ def main():
     # Build model
     model = build_model(cfg)
     model.to(device)
+    print(f"Model has {sum(p.numel() for p in model.parameters())} parameters.")
 
     # Optimizer
     if cfg['training']['optimizer'] == 'adamw':
