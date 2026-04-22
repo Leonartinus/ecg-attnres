@@ -32,7 +32,7 @@ training:
   augment: true
 
 data:
-  data_dir: data/ptbxl
+  data_dir: data/ptb-xl-a-large-publicly-available-electrocardiography-dataset-1.0.3
   task: superclass  # or: subclass
 
 logging:
