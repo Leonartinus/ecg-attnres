@@ -197,13 +197,13 @@ class BlockAttnResEncoder(nn.Module):
             h2, ff_alphas = self._block_attention(self.queries[2 * i + 1], values)
             all_alphas.append(ff_alphas)  # Cache attention weights
 
-            ff_out = self.ff_norms[i](h2)
+            ff_out = self.ffns[i](self.ff_norms[i](h2))
             # Apply the i-th FFN with block-level residual
             partial = partial + ff_out  # Add block-level residual
 
             # TODO: at block boundary, append partial to blocks and reset partial
             if (i + 1) % self.block_size == 0:
-                values.append(partial)
+                blocks.append(partial)
                 partial = torch.zeros_like(x)
         
         values = blocks + [partial]

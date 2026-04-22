@@ -101,15 +101,24 @@ def main():
     all_logits = []
     all_labels = []
     all_alphas = []  # if AttnRes
+    alpha_sums, alpha_counts = None, 0
     with torch.no_grad():
-        for x, y in test_loader:
-            x, y = x.to(device), y.to(device)
-            logits = model(x)
-            all_logits.append(logits.cpu())
-            all_labels.append(y.cpu())
-            # If AttnRes, collect alphas
-            if hasattr(model.encoder, '_last_alphas') and model.encoder._last_alphas is not None:
-                all_alphas.append(model.encoder._last_alphas.cpu())
+      for x, y in test_loader:
+          x, y = x.to(device), y.to(device)
+          logits = model(x)
+          all_logits.append(logits.cpu())
+          all_labels.append(y.cpu())
+
+          last = getattr(model.encoder, "_last_alphas", None)
+          if last is not None:
+              # per-sublayer mean over (batch, seq) -> one scalar per source layer
+              batch_means = [a.mean(dim=(1, 2)).cpu() for a in last]  # list of (n_values_l,)
+              if alpha_sums is None:
+                  alpha_sums = [bm.clone() for bm in batch_means]
+              else:
+                  for i, bm in enumerate(batch_means):
+                      alpha_sums[i] += bm
+              alpha_counts += 1
 
     all_logits = torch.cat(all_logits, dim=0)
     all_labels = torch.cat(all_labels, dim=0)
@@ -141,19 +150,17 @@ def main():
     print(f"CI F_max: {ci['f_max']}")
 
     # Plot attention weights if available
-    if all_alphas:
-        # Average alphas over samples
-        alphas = torch.stack(all_alphas, dim=0).mean(dim=0).numpy()  # (n_layers, n_prev_layers) or something
-        # For FullAttnRes, alphas shape is (batch, n_layers, n_prev)
-        # But averaged: (n_layers, n_prev)
-        # For plot, perhaps per layer, attention to previous
-        # But the plot is (n_classes, n_layers), but alphas are not per class
-        # The user said "Attention Residual weights (α) from the attnres.py layers to show which ECG features the model prioritized"
-        # Perhaps plot the alphas as heatmap, rows layers, columns previous layers
-        class_names = ['NORM', 'MI', 'STTC', 'CD', 'HYP']  # but not per class
-        layer_names = [f'Layer {i}' for i in range(alphas.shape[0])]
+    if alpha_sums is not None:
+        means = [s / alpha_counts for s in alpha_sums]
+        n_rows = len(means)
+        n_cols = max(m.shape[0] for m in means)
+        heat = np.full((n_rows, n_cols), np.nan)
+        for r, m in enumerate(means):
+            heat[r, :m.shape[0]] = m.numpy()
+        layer_names = [f"sublayer {i}" for i in range(n_rows)]
         plot_path = output_dir / f"{cfg['experiment_name']}_attention_heatmap.png"
-        plot_depth_attention_heatmap(alphas, class_names, layer_names, save_path=str(plot_path))
+        plot_depth_attention_heatmap(heat, class_names=[], layer_names=layer_names,
+                                    save_path=str(plot_path))
         print(f"Attention heatmap saved to {plot_path}")
     else:
         print("No attention weights available (not AttnRes model)")

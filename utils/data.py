@@ -114,19 +114,20 @@ class PTBXLDataset(Dataset):
 
     def __getitem__(self, idx: int) -> Tuple[torch.Tensor, torch.Tensor]:
         # TODO: apply augmentation if self.augment
+        x = self.X[idx].copy()  # Avoid modifying original data
         if self.augment:
             # Random time shift
             shift = np.random.randint(-50, 51)
-            self.X[idx] = np.roll(self.X[idx], shift, axis=0)
+            x = np.roll(x, shift, axis=0)
             # Random amplitude scaling
             scale = np.random.uniform(0.9, 1.1)
-            self.X[idx] = self.X[idx] * scale
+            x = x * scale
         
         # TODO: z-score normalize per lead
-        self.X[idx] = (self.X[idx] - self.X[idx].mean()) / (self.X[idx].std() + 1e-8)
+        x = (x - x.mean(axis=0, keepdims=True)) / (x.std(axis=0, keepdims=True) + 1e-8)
 
         # TODO: return (signal_tensor, label_tensor) [+ demographics if provided]
-        signal = torch.tensor(self.X[idx], dtype=torch.float32)
+        signal = torch.tensor(x, dtype=torch.float32)
         label = torch.tensor(self.y[idx], dtype=torch.float32)
         if self.demographics is not None:
             demographics = torch.tensor(self.demographics[idx], dtype=torch.float32)
