@@ -189,12 +189,16 @@ def main():
         optimizer = optim.AdamW(model.parameters(), lr=cfg['training']['lr'], weight_decay=cfg['training']['weight_decay'])
     else:
         raise ValueError(f"Unsupported optimizer: {cfg['training']['optimizer']}")
+    
+    print(f"Using optimizer: {cfg['training']['optimizer']} with lr={cfg['training']['lr']} and weight_decay={cfg['training']['weight_decay']}")
 
     # Scheduler
     if cfg['training']['scheduler'] == 'cosine':
         scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=cfg['training']['epochs'], eta_min=cfg['training']['min_lr'])
     else:
         raise ValueError(f"Unsupported scheduler: {cfg['training']['scheduler']}")
+    
+    print(f"Using scheduler: {cfg['training']['scheduler']} with min_lr={cfg['training']['min_lr']}")
 
     # Criterion
     pos_weights = compute_pos_weights(splits['y_train'])
@@ -222,6 +226,7 @@ def main():
     checkpoint_dir = Path(cfg['logging']['checkpoint_dir'])
     checkpoint_dir.mkdir(parents=True, exist_ok=True)
     best_checkpoint_path = checkpoint_dir / f"{cfg['experiment_name']}_seed{args.seed}_best.pth"
+    print(f"Logging to {log_file}, saving best model to {best_checkpoint_path}")
 
     # Training loop
     patience = cfg['training']['early_stop_patience']
