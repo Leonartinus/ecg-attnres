@@ -78,7 +78,7 @@ class FullAttnResEncoder(nn.Module):
 
             # Apply self-attention sublayer with h as input
             normed = self.attn_norms[l](h)
-            attn_out, _ = self.attns[l](normed, normed, normed)
+            attn_out, _ = self.attns[l](normed, normed, normed, need_weights=False)
 
             hidden_states.append(attn_out)
 
@@ -93,8 +93,8 @@ class FullAttnResEncoder(nn.Module):
         output, alpha_final = self._depth_attention(self.queries[-1], hidden_states)
         all_alphas.append(alpha_final)
 
-        # TODO: cache alpha weights for analysis (attach to self._last_alphas)
-        self._last_alphas = all_alphas
+        # Detach so caching doesn't keep the autograd graph alive across iterations.
+        self._last_alphas = [a.detach() for a in all_alphas]
 
         return self.final_norm(output)
 
@@ -187,7 +187,7 @@ class BlockAttnResEncoder(nn.Module):
             all_alphas.append(attn_alphas)  # Cache attention weights
 
             normed = self.attn_norms[i](h)
-            attn_out, _ = self.attns[i](normed, normed, normed)
+            attn_out, _ = self.attns[i](normed, normed, normed, need_weights=False)
             attn_out = self.attn_dropouts[i](attn_out)
 
             # Apply the i-th sublayer with block_res as input
@@ -210,6 +210,6 @@ class BlockAttnResEncoder(nn.Module):
         output, alpha_final = self._block_attention(self.queries[-1], values)
         all_alphas.append(alpha_final)
 
-        # TODO: cache alpha weights for analysis
-        self._last_alphas = all_alphas
+        # Detach so caching doesn't keep the autograd graph alive across iterations.
+        self._last_alphas = [a.detach() for a in all_alphas]
         return self.final_norm(output)

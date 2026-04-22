@@ -36,7 +36,10 @@ class StandardTransformerLayer(nn.Module):
         return x
     
     def _attn_block(self, x: torch.Tensor) -> torch.Tensor:
-        attn, _ = self.attn(x, x, x)
+        # need_weights=False lets PyTorch dispatch to scaled_dot_product_attention
+        # (Flash / mem-efficient backend) so the (B, H, T, T) score matrix is
+        # never materialized — critical for long sequences like ECG (T~1500).
+        attn, _ = self.attn(x, x, x, need_weights=False)
         return self.dropout(attn)
 
 
