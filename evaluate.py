@@ -13,7 +13,8 @@ from torch.utils.data import DataLoader
 
 from models import ECGClassifier, ECGTokenizer, StandardTransformerEncoder, FullAttnResEncoder, BlockAttnResEncoder
 from utils.data import load_metadata, load_signals, get_splits, PTBXLDataset
-from utils.metrics import compute_macro_auroc, compute_f_max, compute_bootstrap_ci
+from utils.metrics import compute_macro_auroc, compute_f_max, compute_bootstrap_ci, per_class_auroc
+from utils.data import SUPERCLASSES
 from utils.viz import plot_depth_attention_heatmap
 
 
@@ -129,19 +130,35 @@ def main():
     macro_auroc = compute_macro_auroc(labels, probs)
     f_max = compute_f_max(labels, probs)
     ci = compute_bootstrap_ci(labels, probs, n_bootstraps=1000)
+    per_class = per_class_auroc(labels, probs, SUPERCLASSES)
 
-    results = {
+    def _to_py(obj):
+        if isinstance(obj, dict):
+            return {k: _to_py(v) for k, v in obj.items()}
+        if isinstance(obj, (list, tuple)):
+            return [_to_py(v) for v in obj]
+        if isinstance(obj, (np.floating, np.integer)):
+            return float(obj)
+        return obj
+
+    results = _to_py({
         'macro_auroc': macro_auroc,
         'f_max': f_max,
-        'ci': ci
-    }
+        'per_class_auroc': per_class,
+        'ci': ci,
+    })
 
     # Save results
     output_dir = Path(args.output_dir)
-    output_dir.mkdir(exist_ok=True)
+    output_dir.mkdir(parents=True, exist_ok=True)
     results_path = output_dir / f"{cfg['experiment_name']}_results.json"
     with open(results_path, 'w') as f:
         json.dump(results, f, indent=2)
+
+    # Save raw predictions for later paired-bootstrap / cross-model analysis.
+    preds_path = output_dir / f"{cfg['experiment_name']}_preds.npz"
+    np.savez(preds_path, probs=probs, labels=labels)
+    print(f"Predictions saved to {preds_path}")
 
     print(f"Results saved to {results_path}")
     print(f"Macro AUROC: {macro_auroc:.4f}")

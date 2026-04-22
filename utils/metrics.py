@@ -12,8 +12,14 @@ def macro_auroc(y_true: np.ndarray, y_pred: np.ndarray) -> float:
 
 def per_class_auroc(y_true: np.ndarray, y_pred: np.ndarray,
                     class_names: list) -> Dict[str, float]:
-    """Per-class AUROC as a dict."""
-    raise NotImplementedError
+    """Per-class AUROC as a dict. Classes with no positives get NaN."""
+    out = {}
+    for i, name in enumerate(class_names):
+        if y_true[:, i].sum() > 0:
+            out[name] = float(roc_auc_score(y_true[:, i], y_pred[:, i]))
+        else:
+            out[name] = float('nan')
+    return out
 
 
 def bootstrap_auroc(y_true: np.ndarray, y_pred: np.ndarray,

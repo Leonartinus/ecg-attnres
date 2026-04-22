@@ -126,8 +126,8 @@ class PTBXLDataset(Dataset):
         # TODO: z-score normalize per lead
         x = (x - x.mean(axis=0, keepdims=True)) / (x.std(axis=0, keepdims=True) + 1e-8)
 
-        # TODO: return (signal_tensor, label_tensor) [+ demographics if provided]
-        signal = torch.tensor(x, dtype=torch.float32)
+        # Tokenizer expects (n_leads, timesteps); wfdb gives (timesteps, n_leads).
+        signal = torch.from_numpy(np.ascontiguousarray(x.T)).float()
         label = torch.tensor(self.y[idx], dtype=torch.float32)
         if self.demographics is not None:
             demographics = torch.tensor(self.demographics[idx], dtype=torch.float32)

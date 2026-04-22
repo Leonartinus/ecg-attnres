@@ -5,7 +5,6 @@ Usage:
 """
 import argparse
 import csv
-import os
 import random
 from pathlib import Path
 
@@ -71,7 +70,7 @@ def build_model(cfg: dict):
     return model
 
 
-def train_one_epoch(model, loader, optimizer, criterion, device):
+def train_one_epoch(model, loader, optimizer, criterion, device, grad_clip=1.0):
     model.train()
     total_loss = 0.0
     for x, y in loader:
@@ -80,6 +79,8 @@ def train_one_epoch(model, loader, optimizer, criterion, device):
         logits = model(x)
         loss = criterion(logits, y)
         loss.backward()
+        if grad_clip is not None:
+            torch.nn.utils.clip_grad_norm_(model.parameters(), grad_clip)
         optimizer.step()
         total_loss += loss.item()
     return total_loss / len(loader)
@@ -154,9 +155,24 @@ def main():
     train_dataset = PTBXLDataset(splits['X_train'], splits['y_train'], augment=cfg['training']['augment'])
     val_dataset = PTBXLDataset(splits['X_val'], splits['y_val'], augment=False)
 
+    # Seeded generator so shuffle order is reproducible across runs with the same --seed.
+    g = torch.Generator()
+    g.manual_seed(args.seed)
+
+    def _worker_init(worker_id):
+        seed = args.seed + worker_id
+        np.random.seed(seed)
+        random.seed(seed)
+
     # Data loaders
-    train_loader = DataLoader(train_dataset, batch_size=cfg['training']['batch_size'], shuffle=True, num_workers=4)
-    val_loader = DataLoader(val_dataset, batch_size=cfg['training']['batch_size'], shuffle=False, num_workers=4)
+    train_loader = DataLoader(
+        train_dataset, batch_size=cfg['training']['batch_size'], shuffle=True,
+        num_workers=4, generator=g, worker_init_fn=_worker_init,
+    )
+    val_loader = DataLoader(
+        val_dataset, batch_size=cfg['training']['batch_size'], shuffle=False,
+        num_workers=4,
+    )
 
     # Build model
     model = build_model(cfg)
@@ -191,15 +207,15 @@ def main():
 
     # Logging
     log_dir = Path(cfg['logging']['log_dir'])
-    log_dir.mkdir(exist_ok=True)
+    log_dir.mkdir(parents=True, exist_ok=True)
     log_file = log_dir / f"{cfg['experiment_name']}_seed{args.seed}.csv"
     with open(log_file, 'w', newline='') as f:
         writer = csv.writer(f)
         writer.writerow(['epoch', 'train_loss', 'val_loss', 'val_macro_auroc'])
 
     checkpoint_dir = Path(cfg['logging']['checkpoint_dir'])
-    checkpoint_dir.mkdir(exist_ok=True)
-    best_checkpoint_path = checkpoint_dir / "attnres_best.pth"
+    checkpoint_dir.mkdir(parents=True, exist_ok=True)
+    best_checkpoint_path = checkpoint_dir / f"{cfg['experiment_name']}_seed{args.seed}_best.pth"
 
     # Training loop
     patience = cfg['training']['early_stop_patience']
