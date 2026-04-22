@@ -126,7 +126,7 @@ class PTBXLDataset(Dataset):
         self.X[idx] = (self.X[idx] - self.X[idx].mean()) / (self.X[idx].std() + 1e-8)
 
         # TODO: return (signal_tensor, label_tensor) [+ demographics if provided]
-        signal = torch.tensor(self.X[idx], dtype=torch.float32)
+        signal = torch.tensor(self.X[idx].T, dtype=torch.float32)  # Transpose to (n_leads, timesteps)
         label = torch.tensor(self.y[idx], dtype=torch.float32)
         if self.demographics is not None:
             demographics = torch.tensor(self.demographics[idx], dtype=torch.float32)
