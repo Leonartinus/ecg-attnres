@@ -139,7 +139,7 @@ def main():
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     # Load data
-    data_dir = Path('../data/')
+    data_dir = Path(cfg['data']['data_dir'])
     df = load_metadata(data_dir)
     X = load_signals(df, data_dir, sampling_rate=cfg['training']['sampling_rate'])
     splits = get_splits(df, X)
