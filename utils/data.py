@@ -50,17 +50,20 @@ def aggregate_superclass(df: pd.DataFrame, scp_df: pd.DataFrame) -> pd.DataFrame
 
 
 def load_signals(df: pd.DataFrame, data_dir: Path, sampling_rate: int = 100) -> np.ndarray:
-    """Load raw ECG signals via wfdb. Returns array of shape (N, timesteps, 12)."""
-    import wfdb
-    # TODO: iterate over df.filename_lr (100Hz) or df.filename_hr (500Hz)
-    # TODO: wfdb.rdsamp each file; stack
-    if sampling_rate == 100:
-        data = [wfdb.rdsamp(data_dir / f) for f in df.filename_lr]
-    else:
-        data = [wfdb.rdsamp(data_dir / f) for f in df.filename_hr]
-    data = np.array([signal for signal, meta in data])
+    """Load raw ECG signals via wfdb. Returns float32 array of shape (N, timesteps, 12).
 
-    return data
+    Preallocates one buffer and writes records into it directly, so peak RAM
+    is ~N*timesteps*12*4 bytes (no list-then-array doubling, no float64 cost).
+    """
+    import wfdb
+    files = df.filename_lr if sampling_rate == 100 else df.filename_hr
+    timesteps = 1000 if sampling_rate == 100 else 5000
+    n = len(files)
+    out = np.empty((n, timesteps, 12), dtype=np.float32)
+    for i, f in enumerate(files):
+        sig, _ = wfdb.rdsamp(str(data_dir / f))
+        out[i] = sig.astype(np.float32, copy=False)
+    return out
 
 
 def get_splits(df: pd.DataFrame, X: np.ndarray) -> dict:

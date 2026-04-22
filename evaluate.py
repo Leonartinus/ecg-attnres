@@ -87,7 +87,7 @@ def main():
 
     # Test dataset
     test_dataset = PTBXLDataset(splits['X_test'], splits['y_test'], augment=False)
-    test_loader = DataLoader(test_dataset, batch_size=cfg['training']['batch_size'], shuffle=False, num_workers=4)
+    test_loader = DataLoader(test_dataset, batch_size=cfg['training']['batch_size'], shuffle=False, num_workers=0)
 
     # Build model
     model = build_model(cfg)

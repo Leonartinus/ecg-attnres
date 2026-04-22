@@ -164,19 +164,15 @@ def main():
     g.manual_seed(args.seed)
     print(f"DataLoader generator seed: {args.seed}")
 
-    def _worker_init(worker_id):
-        seed = args.seed + worker_id
-        np.random.seed(seed)
-        random.seed(seed)
-
-    # Data loaders
+    # num_workers=0: avoids fork copy-on-write blowup on Colab (each worker would
+    # duplicate the parent's X array as Python touches refcounts → OOM).
     train_loader = DataLoader(
         train_dataset, batch_size=cfg['training']['batch_size'], shuffle=True,
-        num_workers=4, generator=g, worker_init_fn=_worker_init,
+        num_workers=0, generator=g,
     )
     val_loader = DataLoader(
         val_dataset, batch_size=cfg['training']['batch_size'], shuffle=False,
-        num_workers=4,
+        num_workers=0,
     )
 
     # Build model
