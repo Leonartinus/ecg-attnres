@@ -5,7 +5,6 @@
 set -e
 SEEDS=(42 43 44 45 46)
 CONFIGS=(
-    configs/baseline_prenorm.yaml
     configs/baseline_postnorm.yaml
     configs/full_attnres.yaml
     configs/block_attnres_3.yaml
