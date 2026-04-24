@@ -28,31 +28,51 @@ SUPERCLASSES = ["NORM", "MI", "STTC", "CD", "HYP"]
 
 
 def load_model(config_path: str, checkpoint_path: str, device: torch.device):
-    """Build model from config and load trained weights."""
+    """Build model from config and load trained weights. Mirrors evaluate.build_model."""
     with open(config_path) as f:
         cfg = yaml.safe_load(f)
 
-    # TODO: build model from config (same logic as train.py)
+    tokenizer = ECGTokenizer(
+        n_leads=cfg["tokenizer"]["n_leads"],
+        d_model=cfg["tokenizer"]["d_model"],
+    )
+
+    encoder_type = cfg["model"]["type"]
+    if encoder_type == "full_attnres":
+        encoder = FullAttnResEncoder(
+            d_model=cfg["model"]["d_model"],
+            n_layers=cfg["model"]["n_layers"],
+            n_heads=cfg["model"]["n_heads"],
+            d_ff=cfg["model"]["d_ff"],
+            dropout=cfg["model"]["dropout"],
+        )
+    elif encoder_type == "block_attnres":
+        encoder = BlockAttnResEncoder(
+            d_model=cfg["model"]["d_model"],
+            n_blocks=cfg["model"]["n_blocks"],
+            n_layers=cfg["model"]["n_layers"],
+            n_heads=cfg["model"]["n_heads"],
+            d_ff=cfg["model"]["d_ff"],
+            dropout=cfg["model"]["dropout"],
+        )
+    else:
+        raise ValueError(
+            f"Unsupported encoder type for attention visualization: {encoder_type}. "
+            "Only full_attnres and block_attnres expose _last_alphas."
+        )
+
     model = ECGClassifier(
-        tokenizer=ECGTokenizer(n_leads=cfg["n_leads"], d_model=cfg["d_model"]),
-        encoder=FullAttnResEncoder(
-            d_model=cfg["d_model"],
-            n_layers=cfg["n_layers"],
-            n_heads=cfg["n_heads"],
-            d_ff=cfg["d_ff"],
-            dropout=cfg["dropout"]
-        ),
-        d_model=cfg["d_model"],
-        n_classes=cfg["n_classes"],
-        demographic_dim=cfg.get("demographic_dim", 0),
-        dropout=cfg.get("dropout", 0.3)
+        tokenizer=tokenizer,
+        encoder=encoder,
+        d_model=cfg["model"]["d_model"],
+        n_classes=cfg["head"]["n_classes"],
+        demographic_dim=0,
+        dropout=cfg["head"]["dropout"],
     ).to(device)
 
-    # TODO: model.load_state_dict(torch.load(checkpoint_path, map_location=device))
-    state_dict = torch.load(checkpoint_path, map_location=device)
+    checkpoint = torch.load(checkpoint_path, map_location=device)
+    state_dict = checkpoint["model"] if isinstance(checkpoint, dict) and "model" in checkpoint else checkpoint
     model.load_state_dict(state_dict)
-
-    # TODO: model.eval()
     model.eval()
 
     return model
