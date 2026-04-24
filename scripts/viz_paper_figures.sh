@@ -14,8 +14,8 @@ FIGURES_DIR="${FIGURES_DIR:-figures}"
 
 # Order matters: the first model becomes the baseline in the delta-AUROC panel.
 MODELS=(
-    baseline_postnorm
     baseline_prenorm
+    baseline_postnorm
     full_attnres
     block_attnres_2
     block_attnres_3

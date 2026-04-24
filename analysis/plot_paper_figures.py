@@ -147,7 +147,7 @@ def main():
     parser.add_argument("--figures_dir", type=str, default="figures")
     parser.add_argument(
         "--models", nargs="+",
-        default=["baseline_postnorm", "baseline_prenorm",
+        default=["baseline_prenorm", "baseline_postnorm",
                  "full_attnres", "block_attnres_2", "block_attnres_3"],
         help="Order matters: first model is treated as baseline in the delta panel.",
     )
