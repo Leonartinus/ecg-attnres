@@ -17,6 +17,8 @@ logs/*
 outputs/*
 !outputs/.gitkeep
 !outputs/evaluation_summary.json
+!outputs/block_attnres_3_seed42_best_attention_heatmap.png
+!outputs/full_attnres_seed42_best_attention_heatmap.png
 figures/*
 !figures/.gitkeep
 
