@@ -1,0 +1,124 @@
+[
+  {
+    "checkpoint": "baseline_prenorm_seed42_best.pth",
+    "config": "baseline_prenorm",
+    "macro_auroc": 0.9006373057628771,
+    "f_max": 0.7065477645555885,
+    "ci": {
+      "auroc": {
+        "mean": 0.900611923052724,
+        "lower": 0.8909195567846384,
+        "upper": 0.9087300413794738
+      },
+      "f_max": {
+        "mean": 0.7095964720749328,
+        "lower": 0.6942496720343726,
+        "upper": 0.7248099396771512
+      }
+    },
+    "per_class_auroc": {
+      "NORM": 0.9368059496933083,
+      "MI": 0.9139673433362755,
+      "STTC": 0.9272201410754284,
+      "CD": 0.9103568856373906,
+      "HYP": 0.8148362090719828
+    },
+    "model_name": "baseline_prenorm",
+    "config_path": "configs/baseline_prenorm.yaml",
+    "checkpoint_path": "../checkpoints/baseline_prenorm_seed42_best.pth",
+    "sampling_rate": 100,
+    "n_bootstraps": 1000
+  },
+  {
+    "checkpoint": "baseline_postnorm_seed42_best.pth",
+    "config": "baseline_postnorm",
+    "macro_auroc": 0.912786024116838,
+    "f_max": 0.7316405201450631,
+    "ci": {
+      "auroc": {
+        "mean": 0.9129197145121122,
+        "lower": 0.9045549926087765,
+        "upper": 0.9211104166459341
+      },
+      "f_max": {
+        "mean": 0.7343266875372746,
+        "lower": 0.7192878121558604,
+        "upper": 0.7496772596493246
+      }
+    },
+    "per_class_auroc": {
+      "NORM": 0.944209433240422,
+      "MI": 0.9270752427184465,
+      "STTC": 0.9296625795309008,
+      "CD": 0.9234439558773359,
+      "HYP": 0.8395389092170841
+    },
+    "model_name": "baseline_postnorm",
+    "config_path": "configs/baseline_postnorm.yaml",
+    "checkpoint_path": "../checkpoints/baseline_postnorm_seed42_best.pth",
+    "sampling_rate": 100,
+    "n_bootstraps": 1000
+  },
+  {
+    "checkpoint": "block_attnres_3_seed42_best.pth",
+    "config": "block_attnres_3",
+    "macro_auroc": 0.9107804453778661,
+    "f_max": 0.7252870083446641,
+    "ci": {
+      "auroc": {
+        "mean": 0.9107852110796852,
+        "lower": 0.9031277424664254,
+        "upper": 0.9188067459975904
+      },
+      "f_max": {
+        "mean": 0.7284002181145538,
+        "lower": 0.7131926487534807,
+        "upper": 0.7438704047392773
+      }
+    },
+    "per_class_auroc": {
+      "NORM": 0.9454580616410423,
+      "MI": 0.9237842012356575,
+      "STTC": 0.9301696086948062,
+      "CD": 0.9211103635191993,
+      "HYP": 0.8333799917986248
+    },
+    "attention_heatmap": "outputs/block_attnres_3_seed42_best_attention_heatmap.png",
+    "model_name": "block_attnres_3",
+    "config_path": "configs/block_attnres_3.yaml",
+    "checkpoint_path": "../checkpoints/block_attnres_3_seed42_best.pth",
+    "sampling_rate": 100,
+    "n_bootstraps": 1000
+  },
+  {
+    "checkpoint": "full_attnres_seed42_best.pth",
+    "config": "full_attnres",
+    "macro_auroc": 0.9116274414401222,
+    "f_max": 0.7241994428217805,
+    "ci": {
+      "auroc": {
+        "mean": 0.9116158480255888,
+        "lower": 0.9034011774403138,
+        "upper": 0.9195275484597956
+      },
+      "f_max": {
+        "mean": 0.7271878832923134,
+        "lower": 0.7121363593512419,
+        "upper": 0.742263295703761
+      }
+    },
+    "per_class_auroc": {
+      "NORM": 0.9461984099957538,
+      "MI": 0.9278475286849074,
+      "STTC": 0.9340701851972664,
+      "CD": 0.9228433816003944,
+      "HYP": 0.8271777017222889
+    },
+    "attention_heatmap": "outputs/full_attnres_seed42_best_attention_heatmap.png",
+    "model_name": "full_attnres",
+    "config_path": "configs/full_attnres.yaml",
+    "checkpoint_path": "../checkpoints/full_attnres_seed42_best.pth",
+    "sampling_rate": 100,
+    "n_bootstraps": 1000
+  }
+]

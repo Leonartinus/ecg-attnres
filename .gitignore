@@ -5,10 +5,6 @@ __pycache__/
 .pytest_cache/
 .ipynb_checkpoints/
 
-# Virtual environment
-venv/
-env/
-
 # Data (lives in Drive, never in git)
 data/ptbxl/*
 !data/ptbxl/.gitkeep
@@ -20,6 +16,7 @@ logs/*
 !logs/.gitkeep
 outputs/*
 !outputs/.gitkeep
+!outputs/evaluation_summary.json
 figures/*
 !figures/.gitkeep
 
