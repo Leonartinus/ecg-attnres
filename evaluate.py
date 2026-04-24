@@ -80,7 +80,7 @@ def main():
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     # Load data
-    data_dir = Path('../data/')
+    data_dir = Path(cfg['data']['data_dir'])
     df = load_metadata(data_dir)
     X = load_signals(df, data_dir, sampling_rate=cfg['training']['sampling_rate'])
     splits = get_splits(df, X)
@@ -94,7 +94,7 @@ def main():
     model.to(device)
 
     # Load checkpoint
-    checkpoint = torch.load(args.checkpoint, map_location=device)
+    checkpoint = torch.load(args.checkpoint, map_location=device, weights_only=False)
     model.load_state_dict(checkpoint['model'])
     model.eval()
 

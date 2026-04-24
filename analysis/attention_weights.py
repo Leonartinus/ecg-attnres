@@ -70,7 +70,7 @@ def load_model(config_path: str, checkpoint_path: str, device: torch.device):
         dropout=cfg["head"]["dropout"],
     ).to(device)
 
-    checkpoint = torch.load(checkpoint_path, map_location=device)
+    checkpoint = torch.load(checkpoint_path, map_location=device, weights_only=False)
     state_dict = checkpoint["model"] if isinstance(checkpoint, dict) and "model" in checkpoint else checkpoint
     model.load_state_dict(state_dict)
     model.eval()
